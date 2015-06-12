@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+if ARGV == ["help"] || ARGV == [] || ARGV == ["--help"]
+  puts "Commands:"
+  exit 0
+elsif ARGV == ["help", "list"]
+  puts "inqlude list"
+  exit 0
+elsif ARGV == ["--xxx"]
+  STDERR.puts "Unknown option"
+  exit 0
+elsif ARGV == ["list"]
+  puts "one"
+  puts "two"
+  exit 0
+else
+  STDERR.puts "Unrecognized arguments: #{ARGV}"
+  exit 1
+end
