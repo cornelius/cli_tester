@@ -29,21 +29,28 @@ module CliTester
     attr_accessor :stdout, :stderr, :exit_code
   end
 
-  def run_command(cmd: nil, args: nil)
+  def run_command(cmd: nil, args: nil, working_directory: nil)
     if cmd
-      cmd = ["bin/" + cmd]
+      executable = "bin/" + cmd
     else
-      cmd = ["bin/" + File.basename(Dir.pwd)]
+      executable = "bin/" + File.basename(Dir.pwd)
+    end
+    if !File.exist?(executable)
+      executable = cmd
+    end
+    executable = [executable]
+
+    if args
+      executable += args
+    end
+
+    if working_directory
+      Dir.chdir(working_directory)
     end
 
     result = CommandResult.new
-
-    if args
-      cmd += args
-    end
-
     begin
-      o, e = Cheetah.run(cmd, stdout: :capture, stderr: :capture )
+      o, e = Cheetah.run(executable, stdout: :capture, stderr: :capture )
       result.exit_code = 0
       result.stdout = o
       result.stderr = e
