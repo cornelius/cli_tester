@@ -1,5 +1,7 @@
 require_relative "spec_helper"
 
+include CliTester
+
 describe "Command line interface" do
   describe "help" do
     it "shows help when run with no args" do
