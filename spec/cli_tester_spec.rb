@@ -6,10 +6,7 @@ include GivenFilesystemSpecHelpers
 describe "Command line interface" do
   describe "help" do
     it "shows help when run with no args" do
-      result = run_command
-      expect(result.exit_code).to eq(0)
-      expect(result.stdout).to match(/Commands:/)
-      expect(result.stderr.empty?).to be(true)
+      expect(run_command).to exit_with_success(/Commands:/)
     end
 
     it "shows help when run with help command" do

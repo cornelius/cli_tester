@@ -76,7 +76,11 @@ RSpec::Matchers.define :exit_with_success do |expected_stdout|
   match do |result|
     return false if result.exit_code != 0
     return false if !result.stderr.empty?
-    expected_stdout == result.stdout
+    if expected_stdout.is_a?(Regexp)
+      expected_stdout.match(result.stdout)
+    else
+      expected_stdout == result.stdout
+    end
   end
 
   failure_message do |result|
@@ -90,12 +94,17 @@ RSpec::Matchers.define :exit_with_success do |expected_stdout|
     if !result.stderr.empty?
       message += "expected stderr to be empty (was '#{result.stderr}')\n"
     end
-    if result.stdout != expected_stdout
-      message += "expected stdout to be '#{Regexp.escape(expected_stdout)}'"
+    if expected_stdout.is_a?(Regexp)
+      message += "stdout didn't match #{expected_stdout.inspect}"
       message += " (was '#{Regexp.escape(result.stdout)}')"
-      message += "\n\nDiff of stdout:"
-      differ = RSpec::Support::Differ.new(color: true)
-      message += differ.diff(result.stdout, expected_stdout)
+    else
+      if result.stdout != expected_stdout
+        message += "expected stdout to be '#{Regexp.escape(expected_stdout)}'"
+        message += " (was '#{Regexp.escape(result.stdout)}')"
+        message += "\n\nDiff of stdout:"
+        differ = RSpec::Support::Differ.new(color: true)
+        message += differ.diff(result.stdout, expected_stdout)
+      end
     end
     message
   end
