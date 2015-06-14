@@ -55,16 +55,24 @@ end
 describe "options" do
   use_given_filesystem
 
-  it "runs specified cmd" do
+  it "runs local cmd" do
     result = run_command(cmd: "the_other_one")
     expect(result.stdout).to eq("I'm the other one\n")
   end
 
-  it "runs in specified working directory" do
+  it "runs global cmd in specified working directory" do
     dir = given_directory do
       given_dummy_file("hello")
     end
     result = run_command(cmd: "ls", working_directory: dir)
-    expect(result.stdout).to eq("hello\n")
+    expect(result).to exit_with_success(stdout: "hello\n")
+  end
+
+  it "runs local cmd in specified working directory" do
+    dir = given_directory do
+      given_dummy_file("hello")
+    end
+    result = run_command(args: ["ls"], working_directory: dir)
+    expect(result.stdout).to eq(".\n..\nhello\n")
   end
 end

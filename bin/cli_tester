@@ -13,6 +13,9 @@ elsif ARGV == ["list"]
   puts "one"
   puts "two"
   exit 0
+elsif ARGV == ["ls"]
+  puts Dir.entries(Dir.pwd).sort
+  exit 0
 else
   STDERR.puts "Unrecognized arguments: #{ARGV}"
   exit 1

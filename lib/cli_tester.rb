@@ -26,40 +26,72 @@ module CliTester
   end
 
   class CommandResult
-    attr_accessor :stdout, :stderr, :exit_code
+    attr_accessor :stdout, :stderr, :exit_code, :cmd, :error
   end
 
   def run_command(cmd: nil, args: nil, working_directory: nil)
     if cmd
-      executable = "bin/" + cmd
+      path = "bin/" + cmd
     else
-      executable = "bin/" + File.basename(Dir.pwd)
+      path = "bin/" + File.basename(Dir.pwd)
     end
-    if !File.exist?(executable)
-      executable = cmd
+    if !File.exist?(path)
+      executable = [cmd]
+    else
+      executable = [File.expand_path(path)]
     end
-    executable = [executable]
 
     if args
       executable += args
     end
 
     if working_directory
+      current_working_directory = Dir.pwd
       Dir.chdir(working_directory)
     end
 
     result = CommandResult.new
+    result.cmd = executable
     begin
       o, e = Cheetah.run(executable, stdout: :capture, stderr: :capture )
       result.exit_code = 0
       result.stdout = o
       result.stderr = e
     rescue Cheetah::ExecutionFailed => e
+      result.error = e
       result.exit_code = e.status.exitstatus
       result.stdout = e.stdout
       result.stderr = e.stderr
     end
 
+    if working_directory
+      Dir.chdir(current_working_directory)
+    end
+
     result
+  end
+end
+
+RSpec::Matchers.define :exit_with_success do |expected|
+  match do |actual|
+    return false if actual.exit_code != 0
+    return false if !actual.stderr.empty?
+    if expected[:stdout]
+      return expected[:stdout] == actual.stdout
+    else
+      return true
+    end
+  end
+
+  failure_message do |actual|
+    message = "ran #{actual.cmd}\n"
+    message += "error message: #{actual.error}\n"
+    if actual.exit_code != 0
+      message += "expected exit code to be zero (was #{actual.exit_code})\n"
+    end
+    if !actual.stderr.empty?
+      message += "expected stderr to be empty (was '#{actual.stderr}')"
+    end
+    message
   end
 end
