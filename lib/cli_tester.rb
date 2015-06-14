@@ -72,10 +72,18 @@ module CliTester
   end
 end
 
-RSpec::Matchers.define :exit_with_success do |expected_stdout|
+RSpec::Matchers.define :exit_with_success do |expected_stdout, expected_stderr|
   match do |result|
     return false if result.exit_code != 0
-    return false if !result.stderr.empty?
+    if expected_stderr
+      if expected_stderr.is_a?(Regexp)
+        return false if !expected_stderr.match(result.stderr)
+      else
+        return false if expected_stderr != result.stderr
+      end
+    else
+      return false if !result.stderr.empty?
+    end
     if expected_stdout.is_a?(Regexp)
       expected_stdout.match(result.stdout)
     else
@@ -91,8 +99,24 @@ RSpec::Matchers.define :exit_with_success do |expected_stdout|
     if result.exit_code != 0
       message += "expected exit code to be zero (was #{result.exit_code})\n"
     end
-    if !result.stderr.empty?
-      message += "expected stderr to be empty (was '#{result.stderr}')\n"
+    if expected_stderr
+      if expected_stderr.is_a?(Regexp)
+        message += "stderr didn't match #{expected_stderr.inspect}"
+        message += " (was '#{Regexp.escape(result.stderr)}')"
+      else
+        if result.stderr != expected_stderr
+          message += "expected stderr to be '#{Regexp.escape(expected_stderr)}'"
+          message += " (was '#{Regexp.escape(result.stderr)}')"
+          message += "\n\nDiff of stderr:"
+          differ = RSpec::Support::Differ.new(color: true)
+          message += differ.diff(result.stderr, expected_stderr)
+        end
+      end
+    else
+      if !result.stderr.empty?
+        message += "expected stderr to be empty"
+        message += " (was '#{Regexp.escape(result.stderr)}')\n"
+      end
     end
     if expected_stdout.is_a?(Regexp)
       message += "stdout didn't match #{expected_stdout.inspect}"

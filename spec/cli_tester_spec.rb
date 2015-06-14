@@ -10,32 +10,21 @@ describe "Command line interface" do
     end
 
     it "shows help when run with help command" do
-      result = run_command(args: ["help"])
-      expect(result.exit_code).to eq(0)
-      expect(result.stdout).to match(/Commands:/)
-      expect(result.stderr.empty?).to be(true)
+      expect(run_command(args: ["help"])).to exit_with_success(/Commands:/)
     end
 
     it "shows help when run with --help option" do
-      result = run_command(args: ["--help"])
-      expect(result.exit_code).to eq(0)
-      expect(result.stdout).to match(/Commands:/)
-      expect(result.stderr.empty?).to be(true)
+      expect(run_command(args: ["--help"])).to exit_with_success(/Commands:/)
     end
 
     it "shows help for command" do
-      result = run_command(args: ["help", "list"])
-      expect(result.exit_code).to eq(0)
-      expect(result.stdout).to match(/inqlude list/)
-      expect(result.stderr.empty?).to be(true)
+      expect(run_command(args: ["help", "list"])).to exit_with_success(/inqlude list/)
     end
   end
 
   describe "errors" do
     it "fails with unknown option" do
-      result = run_command(args: ["--xxx"])
-      expect(result.exit_code).to eq(0)
-      expect(result.stderr).to match(/Unknown/)
+      expect(run_command(args: ["--xxx"])).to exit_with_success("", /Unknown/)
     end
   end
 
@@ -51,7 +40,7 @@ describe "options" do
 
   it "runs local cmd" do
     result = run_command(cmd: "the_other_one")
-    expect(result.stdout).to eq("I'm the other one\n")
+    expect(result).to exit_with_success("I'm the other one\n")
   end
 
   it "runs global cmd in specified working directory" do
@@ -67,6 +56,6 @@ describe "options" do
       given_dummy_file("hello")
     end
     result = run_command(args: ["ls"], working_directory: dir)
-    expect(result.stdout).to eq(".\n..\nhello\n")
+    expect(result).to exit_with_success(".\n..\nhello\n")
   end
 end
