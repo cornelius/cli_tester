@@ -72,25 +72,30 @@ module CliTester
   end
 end
 
-RSpec::Matchers.define :exit_with_success do |expected|
-  match do |actual|
-    return false if actual.exit_code != 0
-    return false if !actual.stderr.empty?
-    if expected[:stdout]
-      return expected[:stdout] == actual.stdout
-    else
-      return true
-    end
+RSpec::Matchers.define :exit_with_success do |expected_stdout|
+  match do |result|
+    return false if result.exit_code != 0
+    return false if !result.stderr.empty?
+    expected_stdout == result.stdout
   end
 
-  failure_message do |actual|
-    message = "ran #{actual.cmd}\n"
-    message += "error message: #{actual.error}\n"
-    if actual.exit_code != 0
-      message += "expected exit code to be zero (was #{actual.exit_code})\n"
+  failure_message do |result|
+    message = "ran #{result.cmd}\n"
+    if result.error
+      message += "error message: #{result.error}\n"
     end
-    if !actual.stderr.empty?
-      message += "expected stderr to be empty (was '#{actual.stderr}')"
+    if result.exit_code != 0
+      message += "expected exit code to be zero (was #{result.exit_code})\n"
+    end
+    if !result.stderr.empty?
+      message += "expected stderr to be empty (was '#{result.stderr}')\n"
+    end
+    if result.stdout != expected_stdout
+      message += "expected stdout to be '#{Regexp.escape(expected_stdout)}'"
+      message += " (was '#{Regexp.escape(result.stdout)}')"
+      message += "\n\nDiff of stdout:"
+      differ = RSpec::Support::Differ.new(color: true)
+      message += differ.diff(result.stdout, expected_stdout)
     end
     message
   end

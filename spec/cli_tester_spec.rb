@@ -44,10 +44,7 @@ describe "Command line interface" do
 
   describe "list" do
     it "lists libraries" do
-      result = run_command(args: ["list"])
-      expect(result.exit_code).to eq(0)
-      expect(result.stdout).to eq("one\ntwo\n")
-      expect(result.stderr.empty?).to be(true)
+      expect(run_command(args: ["list"])).to exit_with_success("one\ntwo\n")
     end
   end
 end
@@ -65,7 +62,7 @@ describe "options" do
       given_dummy_file("hello")
     end
     result = run_command(cmd: "ls", working_directory: dir)
-    expect(result).to exit_with_success(stdout: "hello\n")
+    expect(result).to exit_with_success("hello\n")
   end
 
   it "runs local cmd in specified working directory" do
