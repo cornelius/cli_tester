@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/cli_tester.svg)](http://badge.fury.io/rb/cli_tester)
+
 CliTester is a simple set of helpers for testing command line interfaces with
 RSpec. It provides a method to run command line applications and a way to check
 the output and exit codes.
