@@ -133,3 +133,59 @@ RSpec::Matchers.define :exit_with_success do |expected_stdout, expected_stderr|
     message
   end
 end
+
+RSpec::Matchers.define :exit_with_error do |exit_code, expected_stderr, expected_stdout|
+  match do |result|
+    return false if result.exit_code != exit_code
+    if expected_stderr.is_a?(Regexp)
+      return false if !expected_stderr.match(result.stderr)
+    else
+      return false if expected_stderr != result.stderr
+    end
+    if expected_stdout
+      if expected_stdout.is_a?(Regexp)
+        return false if !expected_stdout.match(result.stdout)
+      else
+        return false if expected_stdout != result.stdout
+      end
+    end
+    true
+  end
+
+  failure_message do |result|
+    message = "ran #{result.cmd}\n"
+    if result.error
+      message += "error message: #{result.error}\n"
+    end
+    if result.exit_code != exit_code
+      message += "expected exit code to be #{exit_code} (was #{result.exit_code})\n"
+    end
+    if expected_stderr.is_a?(Regexp)
+      message += "stderr didn't match #{expected_stderr.inspect}"
+      message += " (was '#{Regexp.escape(result.stderr)}')"
+    else
+      if result.stderr != expected_stderr
+        message += "expected stderr to be '#{Regexp.escape(expected_stderr)}'"
+        message += " (was '#{Regexp.escape(result.stderr)}')"
+        message += "\n\nDiff of stderr:"
+        differ = RSpec::Support::Differ.new(color: true)
+        message += differ.diff(result.stderr, expected_stderr)
+      end
+    end
+    if expected_stdout
+      if expected_stdout.is_a?(Regexp)
+        message += "stdout didn't match #{expected_stdout.inspect}"
+        message += " (was '#{Regexp.escape(result.stdout)}')"
+      else
+        if result.stdout != expected_stdout
+          message += "expected stdout to be '#{Regexp.escape(expected_stdout)}'"
+          message += " (was '#{Regexp.escape(result.stdout)}')"
+          message += "\n\nDiff of stdout:"
+          differ = RSpec::Support::Differ.new(color: true)
+          message += differ.diff(result.stdout, expected_stdout)
+        end
+      end
+    end
+    message
+  end
+end

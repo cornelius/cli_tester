@@ -26,11 +26,29 @@ describe "Command line interface" do
     it "fails with unknown option" do
       expect(run_command(args: ["--xxx"])).to exit_with_success("", /Unknown/)
     end
+
+    it "fails with error" do
+      expect(run_command(args: ["fail"])).to exit_with_error(1, "failed\n")
+    end
   end
 
   describe "list" do
     it "lists libraries" do
       expect(run_command(args: ["list"])).to exit_with_success("one\ntwo\n")
+    end
+  end
+end
+
+describe "matchers" do
+  describe "exit_with_error" do
+    it "fails when stdout does not match" do
+      expect {
+        expect(run_command(args: ["fail"])).to exit_with_error(1, "failed\n", "wrong")
+      }.to raise_error RSpec::Expectations::ExpectationNotMetError
+    end
+
+    it "passes when stdout does match" do
+      expect(run_command(args: ["fail"])).to exit_with_error(1, "failed\n", "right\n")
     end
   end
 end
