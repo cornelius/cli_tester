@@ -65,6 +65,12 @@ describe "matchers" do
       }.to raise_error RSpec::Expectations::ExpectationNotMetError
     end
 
+    it "fails when program exits with non 0 and no stdout is given for comparison" do
+      expect {
+        expect(run_command(args: ["fail"])).to exit_with_success
+      }.to raise_error RSpec::Expectations::ExpectationNotMetError
+    end
+
     it "succeeds when program exists with 0 and no stdout is given for comparison" do
       expect {
         expect(run_command(args: ["list"])).to exit_with_success

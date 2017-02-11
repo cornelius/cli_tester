@@ -122,16 +122,18 @@ RSpec::Matchers.define :exit_with_success do |expected_stdout, expected_stderr|
         message += " (was '#{Regexp.escape(result.stderr)}')\n"
       end
     end
-    if expected_stdout.is_a?(Regexp)
-      message += "stdout didn't match #{expected_stdout.inspect}"
-      message += " (was '#{Regexp.escape(result.stdout)}')"
-    else
-      if result.stdout != expected_stdout
-        message += "expected stdout to be '#{Regexp.escape(expected_stdout)}'"
+    if expected_stdout
+      if expected_stdout.is_a?(Regexp)
+        message += "stdout didn't match #{expected_stdout.inspect}"
         message += " (was '#{Regexp.escape(result.stdout)}')"
-        message += "\n\nDiff of stdout:"
-        differ = RSpec::Support::Differ.new(color: true)
-        message += differ.diff(result.stdout, expected_stdout)
+      else
+        if result.stdout != expected_stdout
+          message += "expected stdout to be '#{Regexp.escape(expected_stdout)}'"
+          message += " (was '#{Regexp.escape(result.stdout)}')"
+          message += "\n\nDiff of stdout:"
+          differ = RSpec::Support::Differ.new(color: true)
+          message += differ.diff(result.stdout, expected_stdout)
+        end
       end
     end
     message
