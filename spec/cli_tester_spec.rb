@@ -51,6 +51,26 @@ describe "matchers" do
       expect(run_command(args: ["fail"])).to exit_with_error(1, "failed\n", "right\n")
     end
   end
+
+  describe "exit_with_success" do
+    it "succeeds when program exits with 0 and given stdout" do
+      expect {
+        expect(run_command(args: ["list"])).to exit_with_success("one\ntwo\n")
+      }.to_not raise_error
+    end
+
+    it "fails when program exits with 0 and stdout does not match" do
+      expect {
+        expect(run_command(args: ["list"])).to exit_with_success("not what we get")
+      }.to raise_error RSpec::Expectations::ExpectationNotMetError
+    end
+
+    it "succeeds when program exists with 0 and no stdout is given for comparison" do
+      expect {
+        expect(run_command(args: ["list"])).to exit_with_success
+      }.to_not raise_error
+    end
+  end
 end
 
 describe "options" do

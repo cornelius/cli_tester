@@ -84,10 +84,14 @@ RSpec::Matchers.define :exit_with_success do |expected_stdout, expected_stderr|
     else
       return false if !result.stderr.empty?
     end
-    if expected_stdout.is_a?(Regexp)
-      expected_stdout.match(result.stdout)
+    if expected_stdout
+      if expected_stdout.is_a?(Regexp)
+        expected_stdout.match(result.stdout)
+      else
+        expected_stdout == result.stdout
+      end
     else
-      expected_stdout == result.stdout
+      true
     end
   end
 
