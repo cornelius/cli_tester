@@ -13,3 +13,19 @@ CliTester is licensed under the MIT license.
 
 If you have questions or comments, please get in touch with Cornelius Schumacher
 <schumacher@kde.org>.
+
+## Usage
+
+To make the helpers of `cli_tester` available in your tests add the `cli_tester` gem to your Gemfile and include the `CliTester` module in your tests, e.g. in your `spec_helper.rb`:
+
+```ruby
+require "cli_tester"
+
+include CliTester
+```
+
+## Helpers
+
+* `run_command`: Run command with specified arguments
+* `exits_with_success`: Check that executable exits with exit code 0
+* `exits_with_error`: Check that executable exits with exit code different from 0
